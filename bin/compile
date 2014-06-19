@@ -225,15 +225,18 @@ status "223"
 else
 
 status "227"
-
     curl --silent --location "$S3_URL/composer.tar.gz" | tar xz -C $BUILD_DIR/.heroku/php
+status "229"    
     composer() {
+status "231"
         $engine `which composer` "$@"
+status "233"
     }
+status "235"
     export -f composer
+status "237"
     composer self-update --no-interaction --quiet # TODO: specify a version once composer has stable releases
-
-status "236"
+status "239"
 
 fi
 # echo composer version for info purposes
