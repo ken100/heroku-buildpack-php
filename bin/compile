@@ -211,33 +211,71 @@ status "Installing dependencies..."
 
 # check if we should use a composer.phar version bundled with the project
 if [[ -f "composer.phar" ]]; then
+
+status "215"
+
     composer() {
         $engine composer.phar "$@"
     }
     export -f composer
     notice_inline "Found a composer.phar in root directory, will use it for install."
+
+status "223"
+
 else
+
+status "227"
+
     curl --silent --location "$S3_URL/composer.tar.gz" | tar xz -C $BUILD_DIR/.heroku/php
     composer() {
         $engine `which composer` "$@"
     }
     export -f composer
     composer self-update --no-interaction --quiet # TODO: specify a version once composer has stable releases
+
+status "236"
+
 fi
 # echo composer version for info purposes
 # tail to get rid of outdated version warnings (Composer sends those to STDOUT instead of STDERR)
 composer --version 2> /dev/null | tail -n 1 | indent
 
+status "243"
+
 # handle custom oauth keys
 COMPOSER_GITHUB_OAUTH_TOKEN=${COMPOSER_GITHUB_OAUTH_TOKEN:-}
+
+status "248"
+
 if [[ -n "$COMPOSER_GITHUB_OAUTH_TOKEN" ]]; then
+
+status "252"
+
     if curl --fail --silent -H "Authorization: token $COMPOSER_GITHUB_OAUTH_TOKEN" https://api.github.com/rate_limit > /dev/null; then
+        
+        status "256"
+        
         composer config -g github-oauth.github.com "$COMPOSER_GITHUB_OAUTH_TOKEN" &> /dev/null # redirect outdated version warnings (Composer sends those to STDOUT instead of STDERR)
         notice_inline 'Using custom GitHub OAuth token in $COMPOSER_GITHUB_OAUTH_TOKEN'
+        
+        status "261"
+        
     else
+    
+        status "265"
+    
         error 'Invalid GitHub OAuth token in $COMPOSER_GITHUB_OAUTH_TOKEN'
+        
+        status "269"
+        
     fi
+    
+    status "273"
+    
 else
+
+    status "277"
+
     # don't forget to remove any stored key if it's gone from the env
     composer config -g --unset github-oauth.github.com &> /dev/null # redirect outdated version warnings (Composer sends those to STDOUT instead of STDERR)
     if curl --silent https://api.github.com/rate_limit | python -c 'import sys, json; sys.exit((json.load(sys.stdin)["resources"]["core"]["remaining"] > 0))'; then # yes, check > 0, not < 1 - exit status of 0 will trigger the if
@@ -246,9 +284,14 @@ Composer will now try and fall back to slower downloads from source.
 It's strongly recommended you use a custom OAuth token; for details, see
 http://devcenter.heroku.com/articles/php-support#custom-github-oauth-tokens"
     fi
+    
+    status "288"
+    
 fi
 # no need for the token to stay around in the env
 unset COMPOSER_GITHUB_OAUTH_TOKEN
+
+status "294"
 
 # install dependencies
 composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction | indent
